@@ -21,34 +21,37 @@ def get_today_date():
 def collect_news(date_str, date_jp):
     client = anthropic.Anthropic(api_key=os.environ['ANTHROPIC_API_KEY'])
 
-    prompt = f"""今日の日付は{date_jp}です。以下のAI・Claudeニュースを検索・収集して日本語でまとめてください。
+    prompt = f"""今日の日付は{date_jp}です。過去24時間以内に発表・報道されたAI・Claudeニュースのみを検索・収集して日本語でまとめてください。
+
+【重要ルール】
+- 必ず「過去24時間以内」に発表・公開されたものだけを対象とすること
+- 24時間以内の新しい情報が見つからない項目は「本日なし」と記載し、無理にニュースを作らないこと
+- 古いニュースや既報の情報は含めないこと
 
 【収集対象】
 1. Anthropic / Claude の最新アップデート・リリース情報
-2. AI業界の主要ニュース（過去24時間）
-3. Claude Code・MCP関連の新情報があれば
+2. AI業界の主要ニュース（過去24時間以内）
+3. Claude Code・MCP関連の新情報
 
 【出力フォーマット（必ずこの形式で）】
 # 🌅 AI朝刊 - {date_jp}
 
 ## 🤖 Claude / Anthropic アップデート
-- （あれば箇条書き、なければ「本日なし」）
+- （24時間以内の新情報があれば。なければ「本日なし」）
 
-## 📰 AI業界ニュース TOP3
-1.
-2.
-3.
+## 📰 AI業界ニュース
+- （24時間以内のものを最大3件。なければ「本日なし」）
 
 ## 💡 Claude Code / MCP 関連
-- （あれば。なければ省略）
+- （24時間以内の新情報があれば。なければ省略）
 
 ---
 情報源URLも各項目に付記すること。"""
 
     message = client.messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=4096,
-        tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 5}],
+        model="claude-haiku-4-5-20251001",
+        max_tokens=1500,
+        tools=[{"type": "web_search_20250305", "name": "web_search", "max_uses": 3}],
         messages=[{"role": "user", "content": prompt}]
     )
 
